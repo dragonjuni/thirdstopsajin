@@ -1,0 +1,3 @@
+#!/bin/sh
+# A merge commit gets the same photo check as an ordinary commit.
+exec "$(dirname "$0")/pre-commit"

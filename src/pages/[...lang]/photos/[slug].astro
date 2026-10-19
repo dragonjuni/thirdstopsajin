@@ -1,0 +1,121 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { formatDate, langParam, ui } from '../../../lib/i18n';
+import { allPosts, counterpart, indexUrl, keyOf, postUrl, type Kind, type PhotoPost } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await allPosts();
+  return posts
+    .filter((post): post is PhotoPost => post.collection === 'photos')
+    .map((post) => ({
+      params: { lang: langParam(post.data.lang), slug: keyOf(post) },
+      props: { post, other: counterpart(post, posts) },
+    }));
+}
+
+const { post, other } = Astro.props;
+const photo = post.data;
+const lang = photo.lang;
+const t = ui[lang];
+const year = String(photo.date.getUTCFullYear());
+// Each film is shown with its EI, which is listed in the same order.
+const films = (photo.film ?? []).map((film, i) => ({ film, ei: photo.ei?.[i] }));
+const linked = (kind: Kind, values: string[] = []) => values.map((value) => ({ value, url: indexUrl(lang, kind, value) }));
+const { Content } = await render(post);
+---
+
+<Base lang={lang} title={photo.title} otherUrl={other && postUrl(other)}>
+  <article>
+    <h1>{photo.title}</h1>
+    <p class="muted">
+      <a href={indexUrl(lang, 'year', year)}>{formatDate(photo.date, lang)}</a>
+      {!photo.medium.includes('film') && <>{' · '}{t.digital}</>}
+      {photo.location && <>{' · '}{photo.location}</>}
+    </p>
+    <dl>
+      {
+        [
+          [t.camera, linked('camera', photo.camera)],
+          [t.lens, linked('lens', photo.lens)],
+          [t.filter, linked('filter', photo.filter)],
+        ].map(
+          ([label, items]) =>
+            items.length > 0 && (
+              <>
+                <dt>{label}</dt>
+                <dd>
+                  {items.map(({ value, url }, i) => (
+                    <>
+                      {i > 0 && ' · '}
+                      <a href={url}>{value}</a>
+                    </>
+                  ))}
+                </dd>
+              </>
+            ),
+        )
+      }
+      {
+        films.length > 0 && (
+          <>
+            <dt>{t.film}</dt>
+            <dd>
+              {films.map(({ film, ei }, i) => (
+                <>
+                  {i > 0 && ' · '}
+                  <a href={indexUrl(lang, 'film', film)}>{film}</a>
+                  {` (EI ${ei})`}
+                </>
+              ))}
+            </dd>
+          </>
+        )
+      }
+      {
+        photo.lab && (
+          <>
+            <dt>{t.lab}</dt>
+            <dd>{photo.lab.join(' · ')}</dd>
+          </>
+        )
+      }
+    </dl>
+    {
+      other && (
+        <p>
+          <a href={postUrl(other)} hreflang={other.data.lang} lang={other.data.lang}>{ui[other.data.lang].readThisIn}</a>
+        </p>
+      )
+    }
+    <div class="photos">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.1rem 1rem;
+    margin: 1rem 0;
+  }
+  dt {
+    color: var(--muted);
+  }
+  dd {
+    margin: 0;
+  }
+  /* A photo and the caption written on the line below it share a paragraph. */
+  .photos :global(p:has(> img)) {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 2.5rem 0;
+  }
+  .photos :global(img) {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+</style>

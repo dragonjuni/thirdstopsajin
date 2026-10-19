@@ -1,0 +1,14 @@
+# Private context for Claude. Never commit.
+CLAUDE.local.md
+.claude/
+
+# Build output and caches
+/dist/
+/.astro/
+/node_modules/
+
+# Local environment and OS files
+.env
+.env.*
+.DS_Store
+npm-debug.log*

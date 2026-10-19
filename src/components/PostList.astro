@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import { formatDate, ui, type Lang } from '../lib/i18n';
+import { postUrl, type Post } from '../lib/posts';
+
+interface Props {
+  // Already picked for this language with forLang().
+  posts: Post[];
+  lang: Lang;
+}
+
+const { posts, lang } = Astro.props;
+const t = ui[lang];
+---
+
+<ul>
+  {
+    posts.map((post) => (
+      <li>
+        <a href={postUrl(post)} lang={post.data.lang}>
+          {post.data.cover && (
+            <Image src={post.data.cover} alt="" width={960} widths={[480, 960]} sizes="(min-width: 64rem) 20rem, (min-width: 40rem) 45vw, 100vw" />
+          )}
+          <span class="title">{post.data.title}</span>
+        </a>
+        <span class="muted">
+          {formatDate(post.data.date, lang)}
+          {post.data.lang !== lang && <>{' '}<span class="tag">{t.langLabel[post.data.lang]}</span></>}
+        </span>
+        {post.collection === 'notes' && <p lang={post.data.lang}>{post.data.description}</p>}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 2rem 1.25rem;
+  }
+  a {
+    display: block;
+    text-decoration: none;
+  }
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+  }
+  .title {
+    display: block;
+    font-weight: 600;
+  }
+  p {
+    margin: 0.25rem 0 0;
+  }
+</style>

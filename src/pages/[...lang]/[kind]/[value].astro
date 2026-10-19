@@ -1,0 +1,44 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PostList from '../../../components/PostList.astro';
+import { langParam, langs, otherLang, ui, type Lang } from '../../../lib/i18n';
+import { allPosts, forLang, indexUrl, kinds, slugify, valuesOf, type Kind } from '../../../lib/posts';
+
+// One page per camera, lens, film, filter and year that a post uses,
+// in both languages: /film/kodak-e100/ and /ko/film/kodak-e100/.
+export async function getStaticPaths() {
+  const posts = await allPosts();
+  const paths = [];
+  for (const kind of kinds) {
+    const valueBySlug = new Map<string, string>();
+    for (const post of posts) {
+      for (const value of valuesOf(post, kind)) {
+        const slug = slugify(value);
+        if (!slug) {
+          throw new Error(`"${value}" has no letters or numbers, so it cannot have its own page.`);
+        }
+        const seen = valueBySlug.get(slug);
+        if (seen !== undefined && seen !== value) {
+          throw new Error(`"${seen}" and "${value}" would share the page /${kind}/${slug}/. Rename one of them in src/data/.`);
+        }
+        valueBySlug.set(slug, value);
+      }
+    }
+    for (const [slug, value] of valueBySlug) {
+      for (const lang of langs) {
+        paths.push({ params: { lang: langParam(lang), kind, value: slug }, props: { lang, kind, value } });
+      }
+    }
+  }
+  return paths;
+}
+
+const { lang, kind, value } = Astro.props as { lang: Lang; kind: Kind; value: string };
+const posts = forLang(await allPosts(), lang).filter((post) => valuesOf(post, kind).includes(value));
+const heading = kind === 'year' ? (lang === 'ko' ? `${value}년` : value) : `${ui[lang][kind]}: ${value}`;
+---
+
+<Base lang={lang} title={heading} otherUrl={indexUrl(otherLang(lang), kind, value)}>
+  <h1>{heading}</h1>
+  <PostList posts={posts} lang={lang} />
+</Base>

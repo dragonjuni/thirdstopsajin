@@ -1,0 +1,14 @@
+#!/bin/sh
+# Blocks a commit that would add a photo with GPS location data, or one
+# bigger than a web export. Turned on by `npm install` (core.hooksPath).
+
+root=$(git rev-parse --show-toplevel) || exit 1
+tmp=$(mktemp -d) || exit 1
+trap 'rm -rf "$tmp"' EXIT
+
+# Check the staged version of every added or changed file, which is
+# exactly what will be committed, not the working copy.
+git diff --cached --name-only --diff-filter=ACMRT -z |
+  git checkout-index --prefix="$tmp/" -z --stdin || exit 1
+
+cd "$tmp" && sh "$root/scripts/check-photos.sh" .

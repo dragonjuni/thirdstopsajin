@@ -1,0 +1,82 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { formatDate, langParam, ui } from '../../../lib/i18n';
+import { allPosts, counterpart, indexUrl, keyOf, postUrl, valuesOf, type Note } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await allPosts();
+  return posts
+    .filter((post): post is Note => post.collection === 'notes')
+    .map((post) => ({
+      params: { lang: langParam(post.data.lang), slug: keyOf(post) },
+      props: { post, other: counterpart(post, posts) },
+    }));
+}
+
+const { post, other } = Astro.props;
+const note = post.data;
+const lang = note.lang;
+const year = String(note.date.getUTCFullYear());
+const gear = (['camera', 'lens'] as const).flatMap((kind) =>
+  valuesOf(post, kind).map((value) => ({ kind, value })),
+);
+const { Content } = await render(post);
+---
+
+<Base lang={lang} title={note.title} description={note.description} otherUrl={other && postUrl(other)}>
+  <article>
+    <h1>{note.title}</h1>
+    <p class="muted">
+      <a href={indexUrl(lang, 'year', year)}>{formatDate(note.date, lang)}</a>
+    </p>
+    <p class="lede">{note.description}</p>
+    {
+      gear.length > 0 && (
+        <p>
+          {gear.map(({ kind, value }, i) => (
+            <>
+              {i > 0 && ' · '}
+              <a href={indexUrl(lang, kind, value)}>{value}</a>
+            </>
+          ))}
+        </p>
+      )
+    }
+    {
+      note.tags && (
+        <p>
+          {note.tags.map((tag, i) => (
+            <>
+              {i > 0 && ' '}
+              <span class="tag">#{tag}</span>
+            </>
+          ))}
+        </p>
+      )
+    }
+    {
+      other && (
+        <p>
+          <a href={postUrl(other)} hreflang={other.data.lang} lang={other.data.lang}>{ui[other.data.lang].readThisIn}</a>
+        </p>
+      )
+    }
+    <div class="body">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  article {
+    max-width: 40rem;
+  }
+  .lede {
+    font-size: 1.1rem;
+  }
+  .body :global(img) {
+    display: block;
+    width: 100%;
+  }
+</style>

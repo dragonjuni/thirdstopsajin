@@ -1,0 +1,46 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Every push to main builds and publishes the site.
+  push:
+    branches: [main]
+  # Allows a manual run from the Actions tab on GitHub.
+  workflow_dispatch:
+
+# Allow this job to clone the repo and create a page deployment.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  # Opt out of Astro's anonymous usage reporting.
+  ASTRO_TELEMETRY_DISABLED: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      # A backstop for the pre-commit hook, which only runs on a computer
+      # where `npm install` has run. This cannot unpublish a photo already
+      # pushed, but it stops the deploy and makes the problem visible.
+      - name: Check photos for GPS data and size
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+          sh scripts/check-photos.sh
+      - name: Install, build and upload the site
+        uses: withastro/action@v6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
