@@ -67,12 +67,9 @@ Each post is a folder, `src/content/<photos|notes>/<translationKey>/`, holding `
 - When the owner has to click through a dashboard (GitHub, Cloudflare), guide them click by click.
 - Write commit messages in plain English.
 
-## First-session setup (delete this section once it's done)
+## Hosting (set up 2026-10-19)
 
-1. Scaffold the Astro project: collections and schemas, `src/data/` lists (empty until the first real posts), i18n and the deploy workflow. Test the schemas with temporary posts, then delete them before the first push.
-2. Add `CLAUDE.local.md` to `.gitignore` before the first commit.
-3. Create the public repo `dragonjuni/thirdstopsajin` and push.
-4. In the repo, go to Settings → Pages and set Source to GitHub Actions. Enter `thirdstopsajin.com` as the custom domain. Do this before touching DNS.
-5. Verify the domain under GitHub account settings → Pages. GitHub gives a TXT record to add in Cloudflare; keep it there permanently.
-6. In Cloudflare DNS, add A records for `thirdstopsajin.com` pointing to 185.199.108.153, 185.199.109.153, 185.199.110.153 and 185.199.111.153, and a CNAME `www` pointing to `dragonjuni.github.io`. Set every one of these records to **DNS only (grey cloud)**; proxied records stop GitHub from issuing the HTTPS certificate.
-7. Once the certificate has been issued, turn on Enforce HTTPS.
+- GitHub Pages source: GitHub Actions. Custom domain `thirdstopsajin.com`, verified at the account level; Enforce HTTPS is on. `www.thirdstopsajin.com` redirects to the bare domain.
+- Cloudflare DNS: a TXT record `_github-pages-challenge-dragonjuni` (keep it permanently, or the domain loses verification), four A records for `thirdstopsajin.com` (185.199.108.153, .109.153, .110.153, .111.153) and a CNAME `www` → `dragonjuni.github.io`.
+- Every A and CNAME record must stay **DNS only (grey cloud)**. Cloudflare's dashboard recommends proxying them; don't. A proxied record stops GitHub from renewing the HTTPS certificate.
+- If the certificate ever stops being issued, remove and re-save the custom domain in the repo's Settings → Pages to restart GitHub's check.
