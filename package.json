@@ -10,6 +10,7 @@
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build --force && node scripts/check-dist.mjs",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "check-photos": "sh scripts/check-photos.sh",
+    "test": "node tests/posts.mjs && sh tests/photos.sh",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "astro": "astro"
   },

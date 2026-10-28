@@ -18,6 +18,8 @@ Two content collections, both schema-validated. A missing or invalid field must 
 
 Each post is a folder, `src/content/<photos|notes>/<translationKey>/`, holding `en.md` and/or `ko.md` plus its photos. The build also fails if the folder name, `translationKey` and `lang` disagree, or if the two language versions differ on date or gear. Schemas are in `src/content.config.ts`, and checks that need the raw file (real dates, photo names, folder layout) are in `src/lib/content-checks.ts`. `README.md` is the owner's guide to writing posts. `npm run build` uses `--force` because Astro's content cache otherwise skips re-checking unchanged posts when a gear list changes, then runs `scripts/check-dist.mjs` to fail on broken links or photos.
 
+Run `npm test` after changing any check, schema or photo hook. It tests each rule against good and bad sample posts in temporary copies of the project (`tests/`) and takes about a minute.
+
 **`photos`**: photos with short captions. Usually a few frames from one roll, or a set mixing rolls and cameras, rarely a whole roll. (Was `rolls` until 2026-10-19, when the owner said posts won't be whole rolls.) Gear is recorded per post, not per photo (owner's choice, 2026-10-19). Each gear field takes one value or a list.
 - `title`, `date`, `lang` (ko | en), `translationKey`
 - `medium`: film and/or digital
