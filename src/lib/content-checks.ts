@@ -199,6 +199,8 @@ export function postId(collection: 'photos' | 'notes') {
     }
     photos.forEach((ref) => checkPhoto(ref, 'photo'));
     if (typeof data.cover === 'string') checkPhoto(data.cover, 'cover');
+    const link = data.link as { image?: unknown } | undefined;
+    if (typeof link?.image === 'string') checkPhoto(link.image, 'link image');
     if (collection === 'photos' && photos.length === 0) {
       throw new Error(`${where}: a photo post needs at least one photo, written like ![description](./01.jpg).`);
     }

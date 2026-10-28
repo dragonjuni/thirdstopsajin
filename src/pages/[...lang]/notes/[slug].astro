@@ -1,6 +1,7 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
+import LinkCard from '../../../components/LinkCard.astro';
 import { formatDate, langParam, ui } from '../../../lib/i18n';
 import { allPosts, counterpart, indexUrl, keyOf, postUrl, valuesOf, type Note } from '../../../lib/posts';
 
@@ -65,6 +66,7 @@ const { Content } = await render(post);
     <div class="body">
       <Content />
     </div>
+    {note.link && <LinkCard link={note.link} cover={note.cover} lang={lang} />}
   </article>
 </Base>
 

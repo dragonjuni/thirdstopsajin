@@ -27,4 +27,14 @@ Status "draft" means AI-drafted and not yet reviewed by the owner.
 
 ## Gear and process terms
 
-None yet. Terms are added from real posts.
+| English | Korean | Status |
+|---|---|---|
+| Contax T3 (in running text) | 콘탁스 T3 | draft |
+
+The gear lists in `src/data/` keep the English names; Korean appears only in running text.
+
+## Names
+
+| English | Korean | Status |
+|---|---|---|
+| Korea JoongAng Daily | 코리아중앙데일리 (first mention: 중앙일보 영어신문 코리아중앙데일리) | owner-approved |

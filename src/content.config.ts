@@ -110,6 +110,23 @@ const notes = defineCollection({
       cover: image().optional(),
       gear: oneOrMore(listed([...cameras, ...lenses], 'src/data/cameras.json or lenses.json')).optional(),
       tags: z.array(text).optional(),
+      // An article elsewhere, such as one written for KJD, shown as a card.
+      link: z
+        .strictObject({
+          url: z.string().regex(/^https:\/\/\S+$/, 'must be a full web address starting with https://'),
+          title: text,
+          summary: text,
+          source: text,
+          // The language the linked article is written in.
+          lang: z.enum(['en', 'ko']).default('en'),
+          // The card's picture: either a photo in the post's folder, or the
+          // linked site's own picture, shown from its server. Without
+          // either, the card uses the cover.
+          image: image().optional(),
+          imageUrl: z.string().regex(/^https:\/\/\S+$/, 'must be a full web address starting with https://').optional(),
+        })
+        .refine((link) => !(link.image && link.imageUrl), 'use either image or imageUrl, not both.')
+        .optional(),
     }),
 });
 

@@ -1,0 +1,80 @@
+---
+import { Image } from 'astro:assets';
+import { ui, type Lang } from '../lib/i18n';
+import type { Note } from '../lib/posts';
+
+interface Props {
+  link: NonNullable<Note['data']['link']>;
+  // Used when the link has no picture of its own.
+  cover?: Note['data']['cover'];
+  lang: Lang;
+}
+
+const { link, cover, lang } = Astro.props;
+const image = link.image ?? (link.imageUrl ? undefined : cover);
+---
+
+<a class="card" href={link.url}>
+  {image && <Image src={image} alt="" width={480} widths={[240, 480]} sizes="(min-width: 40rem) 11rem, 6.5rem" />}
+  {
+    link.imageUrl && (
+      // The linked site's own picture, loaded from its server. It is hidden
+      // if that server stops providing it.
+      <img src={link.imageUrl} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()" />
+    )
+  }
+  <span class="text" lang={link.lang}>
+    <span class="source">
+      {link.source}
+      {link.lang !== lang && <>{' '}<span class="tag" lang={lang}>{ui[lang].langLabel[link.lang]}</span></>}
+    </span>
+    <span class="title">{link.title}</span>
+    <span class="summary">{link.summary}</span>
+  </span>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    margin: 2rem 0;
+    border: 1px solid var(--rule);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .card:hover {
+    border-color: var(--muted);
+  }
+  /* A small thumbnail beside the text, cropped to the card's height. */
+  img {
+    display: block;
+    width: 6.5rem;
+    height: auto;
+    flex-shrink: 0;
+    align-self: stretch;
+    object-fit: cover;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.9rem 1rem 1rem;
+  }
+  .source {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .title {
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .summary {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  @media (min-width: 40rem) {
+    img {
+      width: 11rem;
+    }
+  }
+</style>
